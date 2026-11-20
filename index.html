@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AUTO-ECOLE MEGA SUCCES</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="brand-title">AUTO-ECOLE <span>MEGA SUCCES</span></div>
+    <div class="header-actions">
+      <button id="btn-install" class="btn-icon hidden" onclick="installPWA()">Installer</button>
+      <button id="btn-logout" class="btn-icon hidden" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- 1. CONNEXION -->
+  <main id="view-login" class="container">
+    <div class="card">
+      <h2>Connexion</h2>
+      <p style="color:var(--muted); font-size:0.9rem; margin-top:4px;">
+        Sanguéra à côté de la poste • Noépé rond-point Akassimé<br>
+        Auto-École : <strong>succesmega70@gmail.com</strong>
+      </p>
+
+      <form id="login-form">
+        <label for="login-email">Adresse E-mail</label>
+        <input type="email" id="login-email" placeholder="succesmega70@gmail.com" required>
+
+        <label for="api-url-input">URL Web App Google Apps Script (Production)</label>
+        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec">
+
+        <button type="submit" class="btn-primary">Se connecter</button>
+      </form>
+      <p id="login-msg" style="color:var(--danger); font-size:0.9rem; text-align:center; margin-top:10px;"></p>
+    </div>
+  </main>
+
+  <!-- 2. DASHBOARD ADMINISTRATEUR / GÉRANT AUTO-ÉCOLE -->
+  <main id="view-admin" class="container hidden">
+    <h2>Espace Gérant — AUTO-ECOLE MEGA SUCCES</h2>
+
+    <div class="billing-box">
+      <div class="billing-badge">Abonnement par Apprenant</div>
+      <h3>Tarif : 1 000 FCFA / apprenant</h3>
+      <p style="margin:6px 0;">Réglez sur le numéro marchand Mobile Money officiel :</p>
+      <div class="merchant-number">93 73 66 65</div>
+      <small>Le compte est créé en statut <strong>en_attente</strong> et un récapitulatif est envoyé à <strong>melkisedecgnimdout@gmail.com</strong> et <strong>succesmega70@gmail.com</strong> pour validation.</small>
+    </div>
+
+    <div class="card">
+      <h3>Inscrire un nouvel apprenant</h3>
+      <form id="register-eleve-form">
+        <label for="el-nom">Nom</label>
+        <input type="text" id="el-nom" placeholder="Nom de l'apprenant" required>
+
+        <label for="el-prenom">Prénom(s)</label>
+        <input type="text" id="el-prenom" placeholder="Prénom(s)" required>
+
+        <label for="el-email">Adresse E-mail</label>
+        <input type="email" id="el-email" placeholder="eleve@exemple.com" required>
+
+        <label for="el-ref">Référence de paiement Mobile Money (optionnel)</label>
+        <input type="text" id="el-ref" placeholder="Ex : TXN-984512">
+
+        <button type="submit" class="btn-primary">Enregistrer l'apprenant</button>
+      </form>
+      <p id="admin-msg" style="color:var(--success); font-weight:600; font-size:0.9rem; margin-top:10px;"></p>
+    </div>
+
+    <div class="card">
+      <h3>Suivi des apprenants</h3>
+      <div id="eleves-list">Chargement...</div>
+    </div>
+  </main>
+
+  <!-- 3. ESPACE APPRENANT -->
+  <main id="view-apprenant" class="container hidden">
+    <section id="tab-cours" class="tab-content">
+      <h2>Cours & Mini-Quiz</h2>
+      <div id="cours-container">Chargement des chapitres...</div>
+    </section>
+
+    <section id="tab-examen" class="tab-content hidden">
+      <div id="exam-intro" class="card">
+        <h2>Simulateur d'Examen Blanc</h2>
+        <p style="line-height:1.6;">
+          • <strong>20 questions</strong> tirées aléatoirement<br>
+          • Propositions mélangées à chaque tentative<br>
+          • Chronomètre actif (10 minutes)<br>
+          • Seuil d'admission : <strong>17 / 20</strong>
+        </p>
+        <button class="btn-primary" onclick="startExam()">Démarrer l'examen</button>
+      </div>
+
+      <div id="exam-runner" class="card hidden">
+        <div class="exam-top">
+          <span id="exam-progress" style="font-weight:700;">Question 1 / 20</span>
+          <span id="exam-timer" class="timer-badge">10:00</span>
+        </div>
+        <h3 id="exam-question-text" style="margin-top:6px;"></h3>
+        <div id="exam-options"></div>
+        <button id="btn-next-q" class="btn-primary hidden" onclick="nextExamQuestion()" style="margin-top:12px;">Question suivante</button>
+      </div>
+
+      <div id="exam-results" class="card hidden"></div>
+    </section>
+
+    <section id="tab-forum" class="tab-content hidden">
+      <h2>Forum d'Entraide</h2>
+      <form id="forum-form" class="card">
+        <label for="forum-input">Poser une question aux moniteurs</label>
+        <textarea id="forum-input" rows="2" placeholder="Votre question sur le code ou la conduite..." required></textarea>
+        <button type="submit" class="btn-primary">Publier</button>
+      </form>
+      <div id="forum-list"></div>
+
+      <div class="card">
+        <h3>Rappel de révision quotidien</h3>
+        <div class="row-inline">
+          <input type="time" id="reminder-time" value="18:30">
+          <button type="button" class="btn-secondary" onclick="setStudyReminder()">Activer</button>
+        </div>
+        <p id="reminder-status" style="font-size:0.85rem; color:var(--muted); margin:4px 0 0;"></p>
+      </div>
+    </section>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="switchTab('cours', this)">Cours</button>
+      <button class="nav-btn" onclick="switchTab('examen', this)">Examen</button>
+      <button class="nav-btn" onclick="switchTab('forum', this)">Forum</button>
+    </nav>
+  </main>
+
+  <button class="fab-bug" onclick="reportBug()" title="Signaler un problème">!</button>
+
+  <script>
+    const DEFAULT_API_URL = "VOTRE_URL_APPS_SCRIPT_ICI";
+    let deferredPrompt = null;
+    let currentUser = JSON.parse(localStorage.getItem("mega_succes_user")) || null;
+
+    function getApiUrl() {
+      const saved = localStorage.getItem("mega_succes_api_url");
+      return (saved && saved.trim()) ? saved.trim() : DEFAULT_API_URL;
+    }
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById("btn-install").classList.remove("hidden");
+    });
+
+    async function installPWA() {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      document.getElementById("btn-install").classList.add("hidden");
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const urlInput = document.getElementById("api-url-input");
+      const savedUrl = localStorage.getItem("mega_succes_api_url");
+      if (savedUrl) urlInput.value = savedUrl;
+      else if (DEFAULT_API_URL !== "VOTRE_URL_APPS_SCRIPT_ICI") urlInput.value = DEFAULT_API_URL;
+
+      if (currentUser) {
+        initApp(currentUser);
+      }
+    });
+
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("login-email").value.trim();
+      const customUrl = document.getElementById("api-url-input").value.trim();
+      if (customUrl) localStorage.setItem("mega_succes_api_url", customUrl);
+
+      const apiUrl = getApiUrl();
+      const msg = document.getElementById("login-msg");
+      if (!apiUrl || apiUrl === "https://script.google.com/macros/s/AKfycbwbQ0FL1cxn9wJ9A2qn8uDzJyL28mOKsrWc7zFsiXhq2YGqQG1c8lERYCViZQ_6Di4PfA/exec") {
+        msg.textContent = "Veuillez renseigner l'URL de déploiement Google Apps Script.";
+        return;
+      }
+
+      msg.textContent = "Vérification en cours...";
+      try {
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          body: JSON.stringify({ action: "login", email })
+        }).then((r) => r.json());
+
+        if (res.success) {
+          currentUser = res.user;
+          localStorage.setItem("mega_succes_user", JSON.stringify(currentUser));
+          msg.textContent = "";
+          initApp(currentUser);
+        } else {
+          msg.textContent = res.message || "Connexion refusée.";
+        }
+      } catch (err) {
+        msg.textContent = "Impossible de joindre l'API Google Apps Script.";
+      }
+    });
+
+    function initApp(user) {
+      document.getElementById("view-login").classList.add("hidden");
+      document.getElementById("btn-logout").classList.remove("hidden");
+      if (user.role === "admin") {
+        document.getElementById("view-admin").classList.remove("hidden");
+        loadEleves();
+      } else {
+        document.getElementById("view-apprenant").classList.remove("hidden");
+        loadCours();
+        loadForum();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("mega_succes_user");
+      location.reload();
+    }
+
+    document.getElementById("register-eleve-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        action: "registerEleve",
+        nom: document.getElementById("el-nom").value.trim(),
+        prenom: document.getElementById("el-prenom").value.trim(),
+        email: document.getElementById("el-email").value.trim(),
+        ref_paiement: document.getElementById("el-ref").value.trim(),
+        ecole_id: currentUser.ecole_id || "MEGA_SUCCES_01"
+      };
+
+      try {
+        const res = await fetch(getApiUrl(), {
+          method: "POST",
+          body: JSON.stringify(payload)
+        }).then((r) => r.json());
+
+        if (res.success) {
+          document.getElementById("admin-msg").textContent = "Compte créé avec le statut en_attente. E-mail récapitulatif envoyé à melkisedecgnimdout@gmail.com et succesmega70@gmail.com.";
+          e.target.reset();
+          loadEleves();
+        } else {
+          document.getElementById("admin-msg").textContent = res.message || "Erreur lors de l'inscription.";
+        }
+      } catch (err) {
+        document.getElementById("admin-msg").textContent = "Erreur réseau lors de l'enregistrement.";
+      }
+    });
+
+    async function loadEleves() {
+      const container = document.getElementById("eleves-list");
+      try {
+        const ecoleId = encodeURIComponent(currentUser.ecole_id || "MEGA_SUCCES_01");
+        const eleves = await fetch(`${getApiUrl()}?action=getEleves&ecole_id=${ecoleId}`).then((r) => r.json());
+        container.innerHTML = eleves.map((el) => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border);">
+            <div>
+              <strong>${el.prenom} ${el.nom}</strong><br>
+              <small style="color:var(--muted);">${el.email} • Réf : ${el.ref_paiement || "—"}</small>
+            </div>
+            <span class="status-pill status-${el.statut}">${el.statut}</span>
+          </div>
+        `).join("") || "<p style='color:var(--muted);'>Aucun apprenant inscrit.</p>";
+      } catch (err) {
+        container.textContent = "Erreur de chargement des apprenants.";
+      }
+    }
+
+    async function loadCours() {
+      const container = document.getElementById("cours-container");
+      try {
+        const cours = await fetch(`${getApiUrl()}?action=getCours`).then((r) => r.json());
+        container.innerHTML = cours.map((c, idx) => {
+          let quiz = [];
+          try { quiz = JSON.parse(c.quiz_json || "[]"); } catch (e) { quiz = []; }
+          return `
+            <div class="card">
+              <small style="color:var(--primary); font-weight:700;">CHAPITRE ${c.chapitre_num}</small>
+              <h3 style="margin:4px 0 10px;">${c.titre}</h3>
+              ${c.video_url ? `<div style="margin-bottom:10px;"><a href="${c.video_url}" target="_blank" rel="noopener">Voir la vidéo pédagogique</a></div>` : ""}
+              <div>${c.contenu_html || ""}</div>
+              ${quiz.length ? `<button class="btn-secondary" style="margin-top:10px;" onclick="runMiniQuiz(${idx})">Mini-quiz (${quiz.length} questions)</button>` : ""}
+            </div>
+          `;
+        }).join("") || "<p>Aucun chapitre disponible.</p>";
+        window._loadedCours = cours;
+      } catch (err) {
+        container.textContent = "Erreur de chargement des cours.";
+      }
+    }
+
+    function runMiniQuiz(coursIndex) {
+      const c = (window._loadedCours || [])[coursIndex];
+      if (!c) return;
+      let quiz = [];
+      try { quiz = JSON.parse(c.quiz_json || "[]"); } catch (e) { quiz = []; }
+      if (!quiz.length) return;
+
+      let score = 0;
+      const details = [];
+      quiz.forEach((q, i) => {
+        const choices = (q.options || []).map((opt, idx) => `${idx + 1}. ${opt}`).join("\n");
+        const rep = prompt(`Question ${i + 1} : ${q.q}\n${choices}\nEntrez le numéro de réponse :`);
+        const chosen = parseInt(rep, 10) - 1;
+        const ok = chosen === q.ans;
+        if (ok) score++;
+        details.push(`Q${i + 1} : ${ok ? "Correct" : "Incorrect"} — Bonne réponse : ${q.options[q.ans]}`);
+      });
+      alert(`Résultat : ${score} / ${quiz.length}\n\n${details.join("\n")}`);
+    }
+
+    let examQuestions = [];
+    let currentQ = 0;
+    let userAns = [];
+    let timer = null;
+    let timeLeft = 600;
+
+    async function startExam() {
+      document.getElementById("exam-intro").classList.add("hidden");
+      document.getElementById("exam-results").classList.add("hidden");
+      document.getElementById("exam-runner").classList.remove("hidden");
+
+      try {
+        const raw = await fetch(`${getApiUrl()}?action=getExamQuestions`).then((r) => r.json());
+        examQuestions = raw.map((q) => {
+          const opts = JSON.parse(q.options_json || "[]");
+          const correctText = opts[Number(q.reponse_index)];
+          const shuffled = [...opts].sort(() => Math.random() - 0.5);
+          return {
+            question: q.question,
+            options: shuffled,
+            correctIndex: shuffled.indexOf(correctText),
+            explication: q.explication || ""
+          };
+        });
+
+        currentQ = 0;
+        userAns = [];
+        timeLeft = 600;
+        clearInterval(timer);
+        timer = setInterval(() => {
+          timeLeft--;
+          const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+          const s = String(timeLeft % 60).padStart(2, "0");
+          document.getElementById("exam-timer").textContent = `${m}:${s}`;
+          if (timeLeft <= 0) finishExam();
+        }, 1000);
+        renderExamQuestion();
+      } catch (err) {
+        alert("Impossible de charger les questions d'examen.");
+      }
+    }
+
+    function renderExamQuestion() {
+      const q = examQuestions[currentQ];
+      document.getElementById("exam-progress").textContent = `Question ${currentQ + 1} / ${examQuestions.length}`;
+      document.getElementById("exam-question-text").textContent = q.question;
+      document.getElementById("btn-next-q").classList.add("hidden");
+      document.getElementById("exam-options").innerHTML = q.options.map((opt, i) => `
+        <button class="option-btn" onclick="selectExamOption(${i}, this)">${opt}</button>
+      `).join("");
+    }
+
+    function selectExamOption(idx, btn) {
+      document.querySelectorAll(".option-btn").forEach((b) => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      userAns[currentQ] = idx;
+      document.getElementById("btn-next-q").classList.remove("hidden");
+    }
+
+    function nextExamQuestion() {
+      currentQ++;
+      if (currentQ < examQuestions.length) {
+        renderExamQuestion();
+      } else {
+        finishExam();
+      }
+    }
+
+    function finishExam() {
+      clearInterval(timer);
+      document.getElementById("exam-runner").classList.add("hidden");
+      const resDiv = document.getElementById("exam-results");
+      resDiv.classList.remove("hidden");
+
+      let score = 0;
+      let corrections = "";
+      examQuestions.forEach((q, i) => {
+        if (userAns[i] === q.correctIndex) {
+          score++;
+        } else {
+          corrections += `
+            <div style="border-left:3px solid var(--danger); padding-left:10px; margin-bottom:10px;">
+              <strong>Q${i + 1} : ${q.question}</strong><br>
+              <span style="color:var(--danger);">Votre réponse : ${q.options[userAns[i]] || "Aucune"}</span><br>
+              <span style="color:var(--success);">Bonne réponse : ${q.options[q.correctIndex]}</span><br>
+              <small style="color:var(--muted);">${q.explication}</small>
+            </div>
+          `;
+        }
+      });
+
+      const admis = score >= 17;
+      resDiv.innerHTML = `
+        <h2>${admis ? "Admis (Seuil 17/20 atteint)" : "Ajourné (Seuil requis : 17/20)"}</h2>
+        <h1 style="color:${admis ? "var(--success)" : "var(--danger)"}; margin:8px 0;">${score} / ${examQuestions.length}</h1>
+        <button class="btn-primary" onclick="startExam()">Nouvelle série</button>
+        <h3 style="margin-top:18px;">Correction détaillée</h3>
+        ${corrections || "<p>Aucune erreur.</p>"}
+      `;
+    }
+
+    async function loadForum() {
+      const container = document.getElementById("forum-list");
+      try {
+        const posts = await fetch(`${getApiUrl()}?action=getForum`).then((r) => r.json());
+        container.innerHTML = posts.map((p) => `
+          <div class="card">
+            <strong>${p.auteur_nom}</strong> <small style="color:var(--muted);">• ${p.date || ""}</small>
+            <p style="margin:6px 0;">${p.message}</p>
+            ${p.reponse_moniteur ? `<div style="background:#f1f5f9; padding:8px 10px; border-radius:8px; font-size:0.9rem;"><strong>Moniteur :</strong> ${p.reponse_moniteur}</div>` : ""}
+          </div>
+        `).join("") || "<p style='color:var(--muted);'>Aucun message pour le moment.</p>";
+      } catch (err) {
+        container.textContent = "Erreur de chargement du forum.";
+      }
+    }
+
+    document.getElementById("forum-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = document.getElementById("forum-input").value.trim();
+      if (!message) return;
+      await fetch(getApiUrl(), {
+        method: "POST",
+        body: JSON.stringify({
+          action: "postForum",
+          auteur_nom: `${currentUser.prenom || ""} ${currentUser.nom || currentUser.email}`.trim(),
+          role: currentUser.role || "apprenant",
+          message
+        })
+      });
+      e.target.reset();
+      loadForum();
+    });
+
+    function setStudyReminder() {
+      const timeVal = document.getElementById("reminder-time").value;
+      localStorage.setItem("mega_succes_reminder", timeVal);
+      if ("Notification" in window) {
+        Notification.requestPermission().then((perm) => {
+          document.getElementById("reminder-status").textContent =
+            `Rappel enregistré à ${timeVal} (Notifications : ${perm}).`;
+        });
+      } else {
+        document.getElementById("reminder-status").textContent = `Rappel enregistré à ${timeVal}.`;
+      }
+    }
+
+    async function reportBug() {
+      const desc = prompt("Décrivez le problème rencontré :");
+      if (!desc) return;
+      try {
+        await fetch(getApiUrl(), {
+          method: "POST",
+          body: JSON.stringify({
+            action: "reportBug",
+            user: currentUser ? currentUser.email : "succesmega70@gmail.com",
+            description: desc
+          })
+        });
+        alert("Signalement transmis.");
+      } catch (err) {
+        alert("Erreur lors de l'envoi du signalement.");
+      }
+    }
+
+    function switchTab(tabName, btn) {
+      document.querySelectorAll(".tab-content").forEach((el) => el.classList.add("hidden"));
+      document.getElementById(`tab-${tabName}`).classList.remove("hidden");
+      document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+  </script>
+</body>
+</html>
